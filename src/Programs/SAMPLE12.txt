@@ -1,0 +1,39 @@
+SET PAGE-NUM=OFF
+TABLE FILE CAR
+HEADING
+"Sales Report"
+" "
+SUM SALES
+BY COUNTRY
+ON TABLE SET STYLE *
+type=report, titletext='Sales Rpt', $
+type=heading, size=18, $
+ENDSTYLE
+ON TABLE PCHOLD AS EX1 FORMAT EXL2K OPEN
+END
+-INCLUDE SAMPLE13
+TABLE FILE CAR
+HEADING
+"Inventory Report"
+" "
+SUM RC
+BY COUNTRY
+ON TABLE SET STYLE *
+type=report, titletext='Inv. Rpt', $
+type=heading, size=18, $
+ENDSTYLE
+ON TABLE HOLD AS EX1 FORMAT EXL2K
+END
+TABLE FILE CAR
+HEADING
+"Cost of Goods Sold Report"
+" "
+SUM DC
+BY COUNTRY
+ON TABLE SET STYLE *
+type=report, titletext='Cost Rpt', $
+type=heading, size=18, $
+ENDSTYLE
+ON TABLE HOLD AS EX1 FORMAT EXL2K CLOSE
+END
+

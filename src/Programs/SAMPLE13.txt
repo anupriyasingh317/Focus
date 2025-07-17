@@ -1,0 +1,146 @@
+SET PAGE-NUM=OFF
+TABLE FILE CAR
+HEADING
+"Sales Report"
+" "
+PRINT RCOST
+BY COUNTRY
+ON TABLE SET STYLE *
+type=report, titletext='Sales Rpt', $
+type=heading, size=18, $
+ENDSTYLE
+ON TABLE PCHOLD AS PIV1 FORMAT EXL2K OPEN
+END
+TABLE FILE CAR
+HEADING
+"Inventory Report"
+" "
+PRINT SALES
+BY COUNTRY
+ON TABLE SET STYLE *
+type=report, titletext='Inv. Rpt', $
+type=heading, size=18, $
+ENDSTYLE
+ON TABLE HOLD AS PPPP FORMAT EXL2K PIVOT
+PAGEFIELDS TYPE SEATS
+CACHEFIELDS MODEL MPG RPM
+END
+
+TABLE FILE CAR
+SUM RCOST
+BY COUNTRY BY CAR BY MODEL BY TYPE BY SEATS SUMMARIZE
+ON MODEL SUB-TOTAL
+ON TABLE HOLD AS XFOCB FORMAT EXL2K FORMULA
+END
+TABLE FILE CAR
+HEADING
+"Cost of Goods Sold Report"
+" "
+PRINT DCOST
+BY COUNTRY
+ON TABLE SET STYLE *
+type=report, titletext='Cost Rpt', $
+type=heading, size=18, $
+ENDSTYLE
+ON TABLE HOLD AS ONE FORMAT EXL2K CLOSE PIVOT
+PAGEFIELDS RCOST
+CACHEFIELDS MODEL TYPE SALES ACCEL SEATS
+END
+
+TABLE FILE GGSALES
+HEADING
+"Report 1: Coffee - Budget"
+SUM BUDDOLLARS BUDUNITS COLUMN-TOTAL AS 'Total'
+BY REGION
+IF CATEGORY EQ Coffee
+ON TABLE PCHOLD FORMAT EXL2K OPEN NOBREAK
+ON TABLE SET STYLE *
+type=report, font=Arial, size = 10, style=normal, $
+type=title, style=bold, $
+type=heading, size=12, style=bold, color=blue, $
+type=grandtotal, style=bold, $
+ENDSTYLE
+END
+TABLE FILE GGSALES
+HEADING
+" "
+"Report 2: Coffee - Actual "
+SUM DOLLARS UNITS COLUMN-TOTAL AS 'Total'
+BY REGION
+IF CATEGORY EQ Coffee
+ON TABLE PCHOLD FORMAT EXL2K
+ON TABLE SET STYLE *
+type=report, font=Arial, size=10, style=normal, $
+type=grandtotal, style=bold, $
+type=heading, size=12, style=bold, color=blue, $
+ENDSTYLE
+END
+TABLE FILE GGSALES
+HEADING
+"Report 3: Food - Budget"
+SUM BUDDOLLARS BUDUNITS COLUMN-TOTAL AS 'Total'
+BY REGION
+IF CATEGORY EQ Food
+ON TABLE PCHOLD FORMAT EXL2K NOBREAK
+ON TABLE SET STYLE *
+type=REPORT, font=Arial, size=10, style=normal, $
+type=HEADING, style=bold, size=12, color=blue, $
+type=title, style=bold, $
+type=grandtotal, style=bold, $
+ENDSTYLE
+END
+
+TABLE FILE GGSALES
+HEADING
+" "
+"Report 4: Food - Actual"
+SUM DOLLARS UNITS COLUMN-TOTAL AS 'Total'
+BY REGION
+IF CATEGORY EQ Food
+ON TABLE PCHOLD FORMAT EXL2K CLOSE
+ON TABLE SET STYLE *
+type=report, font=Arial, size=10, $
+type=title, style=bold, $
+type=heading,size=12, style=bold, color=blue,$
+type=grandtotal, style=bold, $
+ENDSTYLE
+END
+SET PAGE-NUM=OFF
+TABLE FILE CAR
+HEADING
+"Sales Report"
+" "
+SUM SALES
+BY COUNTRY
+ON TABLE SET STYLE *
+type=report, titletext='Sales Rpt', $
+type=heading, size=18, $
+ENDSTYLE
+ON TABLE PCHOLD AS EX1 FORMAT EXL2K OPEN
+END
+TABLE FILE CAR
+HEADING
+"Inventory Report"
+" "
+SUM RC
+BY COUNTRY
+ON TABLE SET STYLE *
+type=report, titletext='Inv. Rpt', $
+type=heading, size=18, $
+ENDSTYLE
+ON TABLE HOLD AS EX1 FORMAT EXL2K
+END
+-INCLUDE SAMPLE14
+TABLE FILE CAR
+HEADING
+"Cost of Goods Sold Report"
+" "
+SUM DC
+BY COUNTRY
+ON TABLE SET STYLE *
+type=report, titletext='Cost Rpt', $
+type=heading, size=18, $
+ENDSTYLE
+ON TABLE HOLD AS EX1 FORMAT EXL2K CLOSE
+END
+
