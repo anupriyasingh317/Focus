@@ -31,5 +31,6 @@
 //*------------------------------------------------------------
 //STEP3   EXEC PGM=IEBGENER
 //SYSUT1   DD DSN=MYID.OUTPUT.SAMPLE17,DISP=SHR
-//SYSUT2   DD SYSOUT=(B,SMTP)             /* Class SMTP maps to email */  
+//SYSUT2   DD SYSOUT=(B,SMTP)
 //SYSPRINT DD SYSOUT=*
+
