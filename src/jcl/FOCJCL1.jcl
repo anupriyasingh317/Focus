@@ -34,13 +34,14 @@
 //*********************************************************                    
 //STEP3    EXEC PGM=FTP,PARM='(EXIT'                       
 //SYSIN    DD   *                                          
-  open   ftp.myserver.com       /* target host */        
-  user   ftpuserid ftppassword  /* creds */              
+  open   ftp.myserver.com               
+  user   ftpuserid ftppassword             
   binary                       
-  cd     /incoming/samples      /* remote dir */         
+  cd     /incoming/samples     
   put    'MYID.USER.SAMPLE16.XCEL1' CITYWISE.xls 
   put    'MYID.USER.SAMPLE16.XCEL2' PRODDATA.xls             
   quit                          
 /*                                                       
 //FTPDATA  DD   SYSOUT=*                                   
 //FTPSYST  DD   SYSOUT=*                                   
+
