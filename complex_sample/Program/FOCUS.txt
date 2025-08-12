@@ -1,0 +1,219 @@
+-SET &ECHO = ALL;
+SET NODATA = ' ';
+SET HOLDLIST = PRINTONLY
+EX FOCDATE
+
+-* ----------------------------------------------------------------------------- 
+-* a, b) Virtuals on EMPLOYEE -> ACTVEMP (active only)
+-* -----------------------------------------------------------------------------
+DEFINE FILE EMPLOYEE
+  AGE/I3       = DATEDIF(DOB, &YYMD, 'Y');
+  OLDEMPID/A4  = EDIT(EMPID, '______$$$$');  -* last 4 chars
+  EMAILID/A60  = LCF(LASTNAME) || '.' || LCF(FIRSTNAME) || '@abc.com';
+END
+TABLE FILE EMPLOYEE
+  PRINT EMPID FIRSTNAME LASTNAME DOB DOJ AGE OLDEMPID EMAILID SALARY DEPT
+  WHERE EMP_STATUS EQ 'ACTIVE';  -* adjust flag/value if different
+  ON TABLE HOLD AS ACTVEMP FORMAT FOCUS
+END
+-RUN
+
+-* ----------------------------------------------------------------------------- 
+-* c, d, e) Left join to DEPARTMENT; depthead_email -> EMPDEPT
+-* -----------------------------------------------------------------------------
+JOIN LEFT_OUTER DEPT IN ACTVEMP TO DEPARTMENT.DEPTID IN DEPARTMENT AS J_ACT_DEPT;
+TABLE FILE ACTVEMP
+  PRINT
+    EMPID FIRSTNAME LASTNAME DOB DOJ AGE OLDEMPID EMAILID SALARY DEPT
+    DEPARTMENT.DEPT_NAME AS DEPT_NAME
+    DEPARTMENT.DEPT_MANAGER AS DEPT_MANAGER
+  COMPUTE DEPTHEAD_EMAIL/A60 = LCF(DEPARTMENT.DEPTHEAD_NAME) || '@abc.com';
+  ON TABLE HOLD AS EMPDEPT FORMAT FOCUS
+END
+JOIN CLEAR *
+-RUN
+
+-* ----------------------------------------------------------------------------- 
+-* f, g, h, i) Join EMPLOYEES to BANK; flags -> BANKDETL
+-* NOTE: INVALID_BANKCODE = 'Y' when NOT found; 'N' when found (used downstream)
+-* -----------------------------------------------------------------------------
+JOIN LEFT_OUTER BANKCODE IN ACTVEMP TO BANK.BANKCODE IN BANK AS J_ACT_BANK;
+TABLE FILE ACTVEMP
+  PRINT
+    EMPID FIRSTNAME LASTNAME DOB DOJ
+    ACTVEMP.BANKCODE AS BANKCODE
+    BANK.BANKNAME    AS BANKNAME
+    BANK.NEFT_CODE   AS NEFT_CODE
+  COMPUTE INVALID_BANKCODE/A1 = IF BANK.BANKCODE IS MISSING THEN 'Y' ELSE 'N';
+  COMPUTE IN_NETWORK/A1       = IF (ACTVEMP.BANKCODE GE 5000 AND ACTVEMP.BANKCODE LE 9000) THEN 'Y' ELSE 'N';
+  ON TABLE HOLD AS BANKDETL FORMAT FOCUS
+END
+JOIN CLEAR *
+-RUN
+
+-* ----------------------------------------------------------------------------- 
+-* j, k) SALES totals by store -> TOPSTORE
+-* -----------------------------------------------------------------------------
+TABLE FILE SALES
+  SUM
+    UNITS_SOLD                       AS TOTAL_SALES
+    (UNITS_SOLD * RETAIL_PRICE) NOPRINT
+  COMPUTE TOTAL_SALES_VALUE/D15.2 = UNITS_SOLD * RETAIL_PRICE;
+  BY STORE_CODE
+  ON TABLE HOLD AS TOPSTORE FORMAT FOCUS
+END
+-RUN
+
+-* ----------------------------------------------------------------------------- 
+-* l) dept_store_code in EMPDEPT
+-* -----------------------------------------------------------------------------
+DEFINE FILE EMPDEPT
+  DEPT_STORE_CODE/A64 = DEPT || STORE_PIN_CODE;
+END
+TABLE FILE EMPDEPT
+  PRINT EMPDEPT.*
+  ON TABLE HOLD AS EMPDEPT_ENR FORMAT FOCUS
+END
+-RUN
+
+-* ----------------------------------------------------------------------------- 
+-* m, n, o) Join EMPDEPT_ENR to TOPSTORE -> TOPEMP
+-* -----------------------------------------------------------------------------
+JOIN LEFT_OUTER STORE_CODE IN EMPDEPT_ENR TO TOPSTORE.STORE_CODE IN TOPSTORE AS J_EMP_TOP;
+TABLE FILE EMPDEPT_ENR
+  PRINT EMPDEPT_ENR.* TOPSTORE.*
+  ON TABLE HOLD AS TOPEMP FORMAT FOCUS
+END
+JOIN CLEAR *
+-RUN
+
+-* ----------------------------------------------------------------------------- 
+-* p, q, r) Join TOPEMP to BANKDETL; BONUS_AMT; filter valid bank -> BONUSFLE
+-* -----------------------------------------------------------------------------
+JOIN LEFT_OUTER EMPID IN TOPEMP TO BANKDETL.EMPID IN BANKDETL AS J_TOP_BANK;
+TABLE FILE TOPEMP
+  PRINT BANKDETL.* TOPEMP.*
+  COMPUTE BONUS_AMT/D12.2 = 30000;
+  COMPUTE SALAMT/D12.2    = BONUS_AMT;
+  WHERE BANKDETL.INVALID_BANKCODE EQ 'N' AND BANKDETL.IN_NETWORK EQ 'Y';
+  ON TABLE HOLD AS BONUSFLE FORMAT FOCUS
+END
+JOIN CLEAR *
+-RUN
+
+-* ----------------------------------------------------------------------------- 
+-* s, t) Years completed + long service tier -> LNGSERV
+-* -----------------------------------------------------------------------------
+JOIN LEFT_OUTER DEPT IN ACTVEMP TO DEPARTMENT.DEPTID IN DEPARTMENT AS J_LNG_DEPT;
+DEFINE FILE ACTVEMP
+  YEARS_COMPLETED/I3 = DATEDIF(DOJ, &YYMD, 'Y');
+  LONG_SERVICE_TIER/A10 =
+    IF YEARS_COMPLETED GE 25 THEN 'Diamond'
+    ELSE IF YEARS_COMPLETED GE 20 THEN 'Platinum'
+    ELSE IF YEARS_COMPLETED GE 15 THEN 'Gold'
+    ELSE IF YEARS_COMPLETED GE 10 THEN 'Silver'
+    ELSE IF YEARS_COMPLETED GE  5 THEN 'Gray'
+    ELSE 'None';
+END
+TABLE FILE ACTVEMP
+  PRINT
+    EMPID FIRSTNAME LASTNAME DOB DOJ AGE OLDEMPID EMAILID SALARY DEPT
+    DEPARTMENT.DEPT_NAME AS DEPT_NAME
+    DEPARTMENT.DEPT_MANAGER AS DEPT_MANAGER
+    YEARS_COMPLETED
+    LONG_SERVICE_TIER
+  ON TABLE HOLD AS LNGSERV FORMAT FOCUS
+END
+JOIN CLEAR *
+-RUN
+
+-* ----------------------------------------------------------------------------- 
+-* u, v, w, x) Join LNGSERV to BANKDETL; award amount -> LAWRDFLE
+-* -----------------------------------------------------------------------------
+JOIN LEFT_OUTER EMPID IN LNGSERV TO BANKDETL.EMPID IN BANKDETL AS J_LAW_BANK;
+TABLE FILE LNGSERV
+  PRINT BANKDETL.* LNGSERV.*
+  COMPUTE LONG_SERV_AWARD/D12.2 =
+    IF LONG_SERVICE_TIER EQ 'Diamond'  THEN 50000
+    ELSE IF LONG_SERVICE_TIER EQ 'Platinum' THEN 40000
+    ELSE IF LONG_SERVICE_TIER EQ 'Gold'     THEN 30000
+    ELSE IF LONG_SERVICE_TIER EQ 'Silver'   THEN 20000
+    ELSE IF LONG_SERVICE_TIER EQ 'Gray'     THEN 10000
+    ELSE 0;
+  COMPUTE SALAMT/D12.2 = LONG_SERV_AWARD;
+  ON TABLE HOLD AS LAWRDFLE FORMAT FOCUS
+END
+JOIN CLEAR *
+-RUN
+
+-* ----------------------------------------------------------------------------- 
+-* y) Concatenate BONUSFLE and LAWRDFLE via MORE; minimal pay feed -> PAYUPDM
+-* -----------------------------------------------------------------------------
+TABLE FILE BONUSFLE
+  PRINT
+    EMPID
+    COMPUTE CURRDATE/YYMD = &YYMD;
+    SALAMT
+    COMPUTE JOB_CODE/A3 = '999';
+  MORE
+  FILE LAWRDFLE
+  PRINT
+    EMPID
+    COMPUTE CURRDATE/YYMD = &YYMD;
+    SALAMT
+    COMPUTE JOB_CODE/A3 = '999';
+  ON TABLE HOLD AS PAYUPDM FORMAT FOCUS
+END
+-RUN
+
+-* ----------------------------------------------------------------------------- 
+-* z) Update EMPLOYEE with PAYINFO from PAYUPDM (by EMPID)
+-* -----------------------------------------------------------------------------
+MATCH FILE EMPLOYEE
+  BY EMPID
+  RUN
+FILE PAYUPDM
+  BY EMPID
+  AFTER MATCH UPDATE
+    PAY_DATE     = CURRDATE
+    PAY_JOB_CODE = JOB_CODE
+    PAY_AMOUNT   = SALAMT
+  AFTER NOMATCH REJECT
+  RUN
+DATA
+END
+-RUN
+
+-* ----------------------------------------------------------------------------- 
+-* aa) Excel workbook with two tabs: BONUSFLE and LNGSERV (bold column names)
+-* -----------------------------------------------------------------------------
+SET ODS EXCEL ON
+SET ODS EXCEL FORMAT=AUTO
+
+TABLE FILE BONUSFLE
+  HEADING
+  "Employee Bonus Payouts (Valid Bank & In-Network)"
+  "Generated: <+0>&YYMD"
+  PRINT *
+  ON TABLE SAVE AS XCL1 FORMAT XLSX
+  ON TABLE SET SHEETNAME 'Bonus Payouts'
+  ON TABLE SET STYLE *
+    TYPE=HEADING, STYLE=BOLD, SIZE=12, JUSTIFY=CENTER, $
+    TYPE=TITLE,   STYLE=BOLD, $
+  ENDSTYLE
+END
+
+TABLE FILE LNGSERV
+  HEADING
+  "Long Service Awards"
+  "Generated: <+0>&YYMD"
+  PRINT *
+  ON TABLE SAVE AS XCL1 FORMAT XLSX
+  ON TABLE SET SHEETNAME 'Long Service'
+  ON TABLE SET STYLE *
+    TYPE=HEADING, STYLE=BOLD, SIZE=12, JUSTIFY=CENTER, $
+    TYPE=TITLE,   STYLE=BOLD, $
+  ENDSTYLE
+END
+
+SET ODS EXCEL OFF
