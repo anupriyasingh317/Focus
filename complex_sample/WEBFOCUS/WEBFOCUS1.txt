@@ -1,0 +1,38 @@
+<HTML>
+<HEAD>
+<TITLE>Enter City for Report</TITLE>
+<style>
+  h1 {
+    color: red; /* This will make the H1 heading text red */
+  }
+</style>
+<script>
+  function validateCity() {
+    const cityInput = document.getElementById("city_input");
+    const cityValue = cityInput.value.trim();
+
+    if (cityValue.length !== 3) {
+      alert("City must be 3 characters long.");
+      return false;
+    }
+
+    if (!cityValue.startsWith('I')) {
+      alert("City must start with the letter 'I'.");
+      return false;
+    }
+
+    return true;
+  }
+</script>
+</HEAD>
+<BODY>
+  <H1>Enter City for Report</H1>
+  <FORM METHOD="GET" ACTION="/ibi_apps/WFServlet" onsubmit="return validateCity()">
+    <INPUT TYPE="HIDDEN" NAME="IBIF_ex" VALUE="WEBFOCUS2">
+    <LABEL FOR="city_input">City:</LABEL>
+    <INPUT TYPE="TEXT" ID="city_input" NAME="CITY">
+    <BR>
+    <INPUT TYPE="SUBMIT" VALUE="Get Report">
+  </FORM>
+</BODY>
+</HTML>

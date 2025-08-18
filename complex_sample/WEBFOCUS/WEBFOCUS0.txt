@@ -1,0 +1,14 @@
+-HTMLFORM BEGIN
+<HTML>
+<HEAD>
+<TITLE>City Report Dashboard</TITLE>
+</HEAD>
+<BODY>
+  <H1>City Report Dashboard</H1>
+  <P>Click the link below to generate a city-wise report:</P>
+  <UL>
+    <LI><A HREF="/ibi_apps/WFServlet?IBIF_ex=WEBFOCUS1">CITYWISE REPORT</A></LI>
+  </UL>
+</BODY>
+</HTML>
+-HTMLFORM END
