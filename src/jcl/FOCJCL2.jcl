@@ -12,7 +12,7 @@
 //*------------------------------------------------------------
 //* STEP2: RUN FOCEXEC SAMPLE17 → consume both inputs, produce SAMPLE17
 //*------------------------------------------------------------
-//STEP2   EXEC PGM=SAMPLE17,REGION=4M
+//STEP2   EXEC PGM=FOCUS,REGION=4M
 //STEPLIB DD DSN=IBI.FOCLIB.LOAD,DISP=SHR
 //SYSIN    DD *
    EX SAMPLE17  &CITY='MUMBAI'
@@ -33,5 +33,6 @@
 //SYSUT1   DD DSN=MYID.OUTPUT.SAMPLE17,DISP=SHR
 //SYSUT2   DD SYSOUT=(B,SMTP)
 //SYSPRINT DD SYSOUT=*
+
 
 
