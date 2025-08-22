@@ -1,0 +1,4 @@
+Stream| Jobname | Schedule| Schedule Time| DSN TRIGGER      |   In-conditions| Out-conditions| Mutually Exclusive Condition| 
+NITTLA| FOCJOB1 | M-F     | 10:00	       |                  |    FOCJOB1-OK  | FOCJOB1-OK    |                             |
+NITTLA| MYJOB   | M-F     | 11:45        |                  |    MYJOB-OK    | MYJOB-OK      |                             |
+NITTLA| FOCJOB2 | M-F     | 14:15        |                  |    FOCJOB2-OK  | FOCJOB2-OK    |                             |
