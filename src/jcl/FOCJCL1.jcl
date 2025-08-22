@@ -12,7 +12,7 @@
 //*********************************************************
 //*   RUN FOCUS PROGRAM SAMPLE16
 //*********************************************************                                                    
-//STEP2    EXEC PGM=SAMPLE16,REGION=4M                           
+//STEP2    EXEC PGM=FOCUS,REGION=4M                           
 //STEPLIB  DD   DSN=IBI.FOCLIB.LOAD,DISP=SHR                        
 //SYSIN    DD   *
  EX SAMPLE16  OPTION='R'
@@ -44,5 +44,6 @@
 /*                                                       
 //FTPDATA  DD   SYSOUT=*                                   
 //FTPSYST  DD   SYSOUT=*                                   
+
 
 
