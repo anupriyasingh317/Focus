@@ -29,10 +29,11 @@
 //             UNIT=SYSDA,                                 
 //             SPACE=(CYL,(5,1)),                          
 //             DCB=(RECFM=FB,LRECL=80) 
+/*
 //*********************************************************
 //*  SEND THE OUTPUT TO SERVER
 //*********************************************************                    
-//STEP3    EXEC PGM=FTP,PARM='(EXIT'                       
+//STEP3    EXEC PGM=FTP,PARM='EXIT'                       
 //SYSIN    DD   *                                          
   open   ftp.myserver.com               
   user   ftpuserid ftppassword             
@@ -44,6 +45,7 @@
 /*                                                       
 //FTPDATA  DD   SYSOUT=*                                   
 //FTPSYST  DD   SYSOUT=*                                   
+
 
 
 
